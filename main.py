@@ -35,8 +35,6 @@ else:
 
 print("\n---CERINTA 2---\n")
 
-lin = lin - 1
-
 alive = sum(df['Survived'])
 dead = lin - alive
 alive = alive / lin * 100
@@ -48,7 +46,6 @@ dead = "%.2f" % dead
 print(f"Procent nesupravietuitori: {dead}%\n")
 
 clasa3 = df[df['Pclass'] == 3]
-lin = df.shape[0]
 alive3 = sum(clasa3['Survived'])
 dead3 = lin - alive3
 alive3 = alive3 / lin * 100
@@ -60,7 +57,6 @@ print(f"Procent supravietuitori: {alive3}%\n")
 print(f"Procent nesupravietuitori: {dead3}%\n")
 
 clasa2 = df[df['Pclass'] == 2]
-lin = df.shape[0]
 alive2 = sum(clasa2['Survived'])
 dead2 = lin - alive2
 alive2 = alive2 / lin * 100
@@ -72,7 +68,6 @@ print(f"Procent supravietuitori: {alive2}%\n")
 print(f"Procent nesupravietuitori: {dead2}%\n")
 
 clasa1 = df[df['Pclass'] == 1]
-lin = df.shape[0]
 alive1 = sum(clasa1['Survived'])
 dead1 = lin - alive1
 alive1 = alive1 / lin * 100
@@ -84,7 +79,6 @@ print(f"Procent supravietuitori: {alive1}%\n")
 print(f"Procent nesupravietuitori: {dead1}%\n")
 
 femei = df[df['Sex'] == 'female']
-lin = df.shape[0]
 alivef = sum(femei['Survived'])
 deadf = lin - alivef
 alivef = alivef / lin * 100
@@ -96,7 +90,6 @@ print(f"Procent supravietuitori: {alivef}%\n")
 print(f"Procent nesupravietuitori: {deadf}%\n")
 
 barbati = df[df['Sex'] == 'male']
-lin = df.shape[0]
 aliveb = sum(barbati['Survived'])
 deadb = lin - aliveb
 aliveb = aliveb / lin * 100
@@ -174,6 +167,7 @@ print("---CERINTA 4---\n")
 
 print("Coloanele pentru care exista valori lipsa:\n")
 
+# valori_lipsa retine coloanele si numarul de valori lipsa pentru fiecare
 for sir, value in valori_lipsa.items():
     if value != 0:
         print(sir)
@@ -192,8 +186,7 @@ for sir, value in valori_lipsa.items():
         print(f"Coloana {sir}:")
         for survived_class in [0, 1]:
             class_count = df[df['Survived'] == survived_class][sir].isnull().sum()
-            # class_proportion = class_count / df[df['Survived'] == survived_class].shape[0]
-            procent = class_count / lin
+            procent = class_count / value
             print(f" - Status supravietuire {survived_class}: {procent:.2%} ({class_count} valori lipsă)")
 
 print("\n---CERINTA 5---\n")
@@ -299,14 +292,21 @@ plt.savefig('Supravietuire adulti vs. copii.png')
 
 # ---CERINTA 8---
 
+# numarul de vii
+alive = sum(df['Survived'])
+# numarul de morti
+dead = lin - alive
+
 dfsur = df[df['Survived'] == 1]['Age']
 dfnot = df[df['Survived'] == 0]['Age']
 
+# media de varsta a persoanelor supravietuitoare
 sum1 = dfsur.sum()
-sum1 = int(sum1 / lin)
+sum1 = int(sum1 / alive)
 
+# media de varsta a persoanelor nesupravietuitoare
 sum2 = dfnot.sum()
-sum2 = int(sum2 / lin)
+sum2 = int(sum2 / dead)
 
 for i in range(1, lin):
     if pd.isnull(df.loc[i, 'Age']) == 1:
@@ -332,6 +332,8 @@ for i in range(1, lin):
             df.at[i, 'Embarked'] = cea_mai_frecv_litera_sur
         if df.at[i, 'Survived'] == 0:
             df.at[i, 'Embarked'] = cea_mai_frecv_litera_not
+
+df.to_csv('cerinta8.csv', index=False)
 
 # ---CERINTA 9---
 
