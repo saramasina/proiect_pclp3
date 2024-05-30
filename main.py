@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 df = pd.read_csv('train.csv')
 
@@ -106,42 +107,21 @@ print("Barbati:\n")
 print(f"Procent supravietuitori: {aliveb}%\n")
 print(f"Procent nesupravietuitori: {deadb}%\n")
 
-# labels = ['C3a', 'C3n', 'C2a', 'C2n', 'C1a', 'C1n', 'Fa', 'Fn', 'Ba', 'Bn']
-# # sizes = [alive3, dead3, alive2, dead2, alive1, dead1, alivef, deadf, aliveb, deadb]
-# sizes = [13.36, 86.64, 9.76, 90.24, 15.26, 84.74, 26.15, 73.85, 12.23, 87.77]
+labels = ['C3a', 'C3n', 'C2a', 'C2n', 'C1a', 'C1n', 'Fa', 'Fn', 'Ba', 'Bn']
+sizes = [13.36, 86.64, 9.76, 90.24, 15.26, 84.74, 26.15, 73.85, 12.23, 87.77]
 
-# plt.figure(figsize=(10, 8))
-# plt.bar(labels, sizes)
-# plt.xlabel('Categorie')
-# plt.ylabel('Procentul pasagerilor')
-# plt.title('Procentul pasagerilor pentru fiecare categorie')
-# plt.savefig('cerinta2.png')
+plt.figure()
+plt.figure(figsize=(10, 6))
+bars = plt.bar(labels, sizes, color='skyblue')
 
-# labels = ("Cls 3", "Cls 2", "Cls 1", "Femei", "Barbati")
-# sizes = {
-#     'Vii': (alive3, alive2, alive1, alivef, aliveb),
-#     'Morti': (dead3, dead2, dead1, deadf, deadb)
-# }
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width() / 2, yval + 1, f'{yval}', ha='center', va='bottom')
 
-# x = np.arange(len(labels))
-# width = 0.10
-# multiplier = 0
-
-# fig, ax = plt.subplots(layout='constrained')
-
-# for attribute, measurement in sizes.items():
-#     offset = width * multiplier
-#     rects = ax.bar(x + offset, measurement, width, label=attribute)
-#     ax.bar_label(rects, padding=2)
-#     multiplier += 1
-
-# # Add some text for labels, title and custom x-axis tick labels, etc.
-# ax.set_ylabel('Procente')
-# ax.set_title('Categorii')
-# ax.set_xticks(x + width, labels)
-# ax.legend(loc='upper left', ncols=3)
-
-# plt.savefig('cerinta2.png')
+plt.xlabel('Categorii')
+plt.ylabel('Valori')
+plt.title('Histograma cu valori si categorii')
+plt.savefig('cerinta2.png')
 
 print("---CERINTA 3---\n")
 
@@ -244,7 +224,6 @@ def cat_age(age):
     elif age >= 61:
         return 4
 
-# Adăugarea unei noi coloane bazată pe categorii de vârstă
 df['Categorie varsta'] = df['Age'].apply(cat_age)
 
 plt.figure()
@@ -303,6 +282,135 @@ for value in df1:
 
 procent = copii / lin
 print(f"\nProcentul de copii la bord este : {procent:.2%}")
+
+procent_adulti = 100 - procent
+
+plt.figure()
+labels = ['Copii', 'Adulti']
+bx = b_survivors.plot(kind = 'hist', bins = [0.5, 1.5, 2.5], rwidth=0.2)
+plt.ylabel('Procente')
+plt.xlim(0.5, 2.5)
+plt.title('Supravietuire adulti vs. copii')
+for patch in bx.patches:
+    height = patch.get_height()
+    bx.text(patch.get_x() + patch.get_width() / 2, height + 0.1, f'{int(height)}', ha='center', va='bottom')
+plt.xticks(ticks=[1, 2], labels=labels)
+plt.savefig('Supravietuire adulti vs. copii.png')
+
+# ---CERINTA 8---
+
+dfsur = df[df['Survived'] == 1]['Age']
+dfnot = df[df['Survived'] == 0]['Age']
+
+sum1 = dfsur.sum()
+sum1 = int(sum1 / lin)
+
+sum2 = dfnot.sum()
+sum2 = int(sum2 / lin)
+
+for i in range(1, lin):
+    if pd.isnull(df.loc[i, 'Age']) == 1:
+        if df.at[i, 'Survived'] == 1:
+            df.at[i, 'Age'] = sum1
+        if df.at[i, 'Survived'] == 0:
+            df.at[i, 'Age'] = sum2
+
+dfsur = df[df['Survived'] == 1]['Embarked']
+dfnot = df[df['Survived'] == 0]['Embarked']
+
+sur_frecv = dfsur.value_counts()
+
+cea_mai_frecv_litera_sur = sur_frecv.idxmax()
+
+not_frecv = dfnot.value_counts()
+
+cea_mai_frecv_litera_not = not_frecv.idxmax()
+
+for i in range(1, lin):
+    if pd.isnull(df.loc[i, 'Embarked']) == 1:
+        if df.at[i, 'Survived'] == 1:
+            df.at[i, 'Embarked'] = cea_mai_frecv_litera_sur
+        if df.at[i, 'Survived'] == 0:
+            df.at[i, 'Embarked'] = cea_mai_frecv_litera_not
+
+# ---CERINTA 9---
+
+relatie_titlu_sex = {
+    'Mr.': 'male',
+    'Mrs.': 'female',
+    'Miss': 'female',
+    'Ms.': 'female',
+    'Don.': 'male',
+    'Rev.': 'male',
+    'Master.': 'male',
+    'Jonkheer.': 'male'
+}
+
+titluri = ['Mr.', 'Mrs.', 'Miss', 'Ms.', 'Rev.', 'Master.', 'Jonkheer.', 'Don.']
+
+vect_titluri = [0] * 8
+
+for i in range(1, lin):
+    sir = df.at[i, 'Name']
+    for titlu in titluri:
+        if sir.find(titlu) != -1:
+            break
+    sex_pretins = relatie_titlu_sex.get(titlu)
+    index = titluri.index(titlu)
+    if sex_pretins == df.at[i, 'Sex']:
+        vect_titluri[index] += 1
+
+plt.figure()
+plt.figure(figsize=(9, 9))
+bars = plt.bar(titluri, vect_titluri)
+
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width() / 2, yval + 5, f'{yval}', ha='center', va='bottom')
+
+plt.ylabel('Număr de persoane')
+plt.title('Numar persoane ce corespund titlurilor lor.png')
+plt.savefig('Numar persoane ce corespund titlurilor lor.png')
+
+# -------Cerinta 10--------
+
+k_singuri = 0
+
+for i in range(1, lin):
+    nr1 = df.at[i, 'SibSp']
+    nr2 = df.at[i, 'Parch']
+    nr = nr1 + nr2
+    if nr == 0 and df.at[i, 'Survived'] == 1:
+        k_singuri += 1
+
+alive = sum(df['Survived'])
+
+k_nu_singuri = alive - k_singuri
+
+vect = [k_singuri, k_nu_singuri]
+
+labels = ['Singuri', 'Nu singuri']
+
+plt.figure()
+plt.figure(figsize=(9, 9))
+bars = plt.bar(labels, vect, color=['blue', 'red'])
+
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width() / 2, yval + 5, f'{yval}', ha='center', va='bottom')
+
+plt.ylabel('Număr de persoane')
+plt.title('Supraviețuitori în funcție de starea de a fi singur pe vas')
+plt.savefig('Supravietuitori in functie de rude pe vas')
+
+df = df.head(100)
+
+plt.figure()
+plt.figure(figsize=(15, 10))
+sns.catplot(data=df, x="Survived", y="Fare", hue="Pclass")
+plt.xlabel('Class')
+plt.ylabel('Fare')
+plt.savefig('Relatia dintre clasa, tarif si starea de supravietuire')
 
 
 
